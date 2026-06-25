@@ -78,6 +78,22 @@ CITY_NAMES.each_with_index do |name, i|
 end
 puts
 
+unless SKIP_IMAGES
+  # Pre-generate the grid thumbnail so the first /cities load isn't 50 cold
+  # variant generations at once (which can make images look broken briefly).
+  print "  warming image variants..."
+  cities_by_name.each_value do |city|
+    next unless city.image.attached?
+
+    begin
+      city.image.variant(resize_to_fill: [ 640, 400 ]).processed
+    rescue => e
+      Rails.logger.warn("[seed] variant warm failed for #{city.name}: #{e.message}")
+    end
+  end
+  puts " done"
+end
+
 puts "Creating posts..."
 # Hand-written posts for a few marquee cities...
 curated = [
