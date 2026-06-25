@@ -49,7 +49,9 @@ Browser → Routes → Controller (+ before_action filters) → Model → View /
 ```
 
 - **Routing** (`config/routes.rb`) is RESTful with shallow nesting
-  (`cities → posts → comments`).
+  (`cities → posts → comments`). The root path is a dedicated landing page
+  (`HomeController#index`) — a hero, featured destinations, and the latest
+  stories — distinct from the full `/cities` browse grid.
 - **Controllers** stay thin: load records, enforce authorization via the
   `Authentication` concern, and render. Cross-cutting auth/authorization logic
   lives in `app/controllers/concerns/authentication.rb` rather than being
@@ -153,4 +155,6 @@ bundle exec brakeman    # security scan
 - `app/controllers/concerns/authentication.rb` — session auth + authorization helpers
 - `app/views/shared/` — layout partials (`navbar`, `flash`, `form_errors`)
 - `app/javascript/controllers/` — Stimulus controllers (`flash`, `preview`)
-- `db/seeds.rb` — sample users, cities (with images), posts, and comments
+- `app/controllers/home_controller.rb` — landing page (hero, featured cities, latest posts)
+- `db/seeds.rb` — 50 top tourism cities (images pulled by name), sample users, posts, and comments
+  (set `SKIP_CITY_IMAGES=1` to seed names only and skip the ~50 image lookups)

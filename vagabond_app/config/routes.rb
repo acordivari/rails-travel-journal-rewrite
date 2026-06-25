@@ -1,5 +1,5 @@
 Rails.application.routes.draw do
-  root "cities#index"
+  root "home#index"
 
   # Authentication
   resource :session, only: %i[new create destroy]

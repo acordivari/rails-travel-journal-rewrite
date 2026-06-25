@@ -1,22 +1,10 @@
 <% content_for :title, "Browse cities — Vagabond" %>
 
-<section class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-600 to-sky-500 text-white px-6 sm:px-10 py-14 mb-10">
-  <div class="max-w-2xl">
-    <h1 class="text-4xl sm:text-5xl font-extrabold tracking-tight">Travel stories, city by city.</h1>
-    <p class="mt-4 text-lg text-indigo-100">
-      Discover what it's really like to visit a place — written by people who've been there.
-    </p>
-    <% unless logged_in? %>
-      <div class="mt-6 flex gap-3">
-        <%= link_to "Join Vagabond", new_user_path, class: "btn bg-white text-indigo-700 hover:bg-indigo-50" %>
-        <%= link_to "Log in", login_path, class: "btn bg-indigo-700/40 text-white hover:bg-indigo-700/60" %>
-      </div>
-    <% end %>
+<div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-8">
+  <div>
+    <h1 class="text-3xl font-extrabold tracking-tight text-slate-900">Browse cities</h1>
+    <p class="mt-1 text-slate-500"><%= pluralize(@cities.size, "destination") %> to explore.</p>
   </div>
-</section>
-
-<div class="flex items-center justify-between mb-6">
-  <h2 class="text-2xl font-bold text-slate-900">Cities</h2>
   <% if current_user&.admin? %>
     <%= link_to "Add a city", new_city_path, class: "btn-primary" %>
   <% end %>
