@@ -3,7 +3,7 @@
 <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-8">
   <div>
     <h1 class="text-3xl font-extrabold tracking-tight text-slate-900">Browse cities</h1>
-    <p class="mt-1 text-slate-500"><%= pluralize(@cities.size, "destination") %> to explore.</p>
+    <p class="mt-1 text-slate-500"><%= pluralize(@cities.length, "destination") %> to explore.</p>
   </div>
   <% if current_user&.admin? %>
     <%= link_to "Add a city", new_city_path, class: "btn-primary" %>

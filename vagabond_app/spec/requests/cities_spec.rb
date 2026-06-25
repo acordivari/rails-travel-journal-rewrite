@@ -11,6 +11,13 @@ RSpec.describe "Cities", type: :request do
     expect(response.body).to include("Oslo")
   end
 
+  it "shows an integer destination count, not the grouped-count hash" do
+    create_list(:city, 3)
+    get cities_path
+    expect(response.body).to match(/3 destinations to explore/)
+    expect(response.body).not_to include("=&gt;") # grouped count hash leaking into HTML
+  end
+
   describe "creation (admin only)" do
     it "blocks a guest" do
       get new_city_path
