@@ -4,6 +4,8 @@ A travel-journaling web app: members write **posts** (travel stories) about **ci
 
 > This is a ground-up modernization of the original **[andrewdc92/Vagabond](https://github.com/andrewdc92/Vagabond)** (Rails 5.0 / Ruby 2.3). The rewrite upgrades to Rails 8 / Ruby 3.3, adds Hotwire, Tailwind, Active Storage, comments, server-side authorization, and a full RSpec suite. See [andrewdc92/Vagabond](https://github.com/andrewdc92/Vagabond) for the original.
 
+![Vagabond home page](https://raw.githubusercontent.com/acordivari/rails-travel-journal-rewrite/main/vagabond_app/docs/home.png)
+
 ## Stack
 
 - **Ruby** 3.3 / **Rails** 8.0
