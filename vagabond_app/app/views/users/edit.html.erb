@@ -1,20 +1,9 @@
+<% content_for :title, "Edit profile — Vagabond" %>
 
+<div class="max-w-md mx-auto">
+  <h1 class="text-2xl font-bold mb-6">Edit your profile</h1>
 
-
-<% if @user.id == current_user.id %>
-  <%= form_for @user do |f| %>
-    <div>
-      <%= f.text_field :name, placeholder: "Full Name" %>
-    </div>
-    <div>
-      <%= f.text_field :current_city, placeholder: "Current City" %>
-    </div>
-    <div>
-      <%= f.text_field :email, placeholder: "Email" %>
-    </div>
-
-    <%= f.submit "Save User Changes" %>
-  <% end %>
-<% else %>
-  Something messed up :(
-<% end %>
+  <div class="card p-6">
+    <%= render "users/form", user: @user %>
+  </div>
+</div>

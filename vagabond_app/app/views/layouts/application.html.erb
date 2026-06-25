@@ -1,49 +1,36 @@
 <!DOCTYPE html>
-<html>
+<html class="h-full">
   <head>
-    <title>üTravel</title>
+    <title><%= content_for(:title) || "Vagabond — travel stories, city by city" %></title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
     <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
 
-    <%= stylesheet_link_tag    'application', media: 'all', 'data-turbolinks-track': 'reload' %>
-    <%= javascript_include_tag 'application', 'data-turbolinks-track': 'reload' %>
-    <!-- Latest compiled and minified JavaScript -->
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+    <%= yield :head %>
+
+    <link rel="icon" href="/icon.png" type="image/png">
+    <link rel="icon" href="/icon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/icon.png">
+
+    <%= stylesheet_link_tag "tailwind", "data-turbo-track": "reload" %>
+    <%= javascript_importmap_tags %>
   </head>
 
-  <body>
-    <nav class="navbar navbar-default">
-      <div class="container-fluid">
-        <div class="navbar-header">
-          <p class="navbar-brand"><%= link_to "üTravel", root_path %></p>
-        </div>
+  <body class="h-full bg-slate-50 text-slate-900 antialiased flex flex-col min-h-full">
+    <%= render "shared/navbar" %>
 
-        <ul class="nav navbar-nav navbar-right">
-          <% if current_user %>
-          <li><%= link_to "Profile", user_path(current_user) %></li>
-          <li><%= link_to "Log Out", logout_path %></li>
-          <li><%= link_to "Browse Cities", cities_path %></li>
+    <main class="flex-1 w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <%= render "shared/flash" %>
+      <%= yield %>
+    </main>
 
-          <% else %>
-          <li><%= link_to "Log In", login_path %></li>
-          <li><%= link_to "Sign Up", new_user_path %></li>
-          <li><%= link_to "Browse Cities", cities_path %></li>
-
-          <% end %>
-        </ul>
+    <footer class="border-t border-slate-200 bg-white">
+      <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 text-sm text-slate-500 flex flex-col sm:flex-row justify-between gap-2">
+        <p>&copy; <%= Time.current.year %> Vagabond. Learn about cities from other travelers.</p>
+        <p>Built with Rails <%= Rails::VERSION::STRING %>.</p>
       </div>
-
-    </nav>
-    <div id ="about">
-      <center><p1> Learn about different cities from other people's travel experiences.<hr class="fancy"> </p1><center>
-    </div>
-    <% flash.each do |name, msg| %>
-
-    <div class="alert <%= bootstrap_class_for(name) %> fade in">
-      <button class="close" data-dismiss="alert">×</button>
-      <p><%= msg %></p>
-    </div>
-
-    <% end %>
-    <%= yield %>
+    </footer>
   </body>
 </html>

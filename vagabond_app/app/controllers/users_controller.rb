@@ -1,58 +1,63 @@
 class UsersController < ApplicationController
+  before_action :require_login, only: %i[edit update destroy]
+  before_action :set_user, only: %i[show edit update destroy]
+  before_action -> { authorize_owner_or_admin(@user) }, only: %i[edit update destroy]
 
   def index
-    @users = User.all
+    @users = User.order(:name)
+  end
+
+  def show
+    @posts = @user.posts.includes(:city).recent
   end
 
   def new
+    redirect_to(root_path) and return if logged_in?
+
     @user = User.new
   end
 
   def create
-    @user = User.create(user_params)
-
+    @user = User.new(user_params)
     if @user.save
-
-      login(@user)
+      log_in(@user)
+      flash[:notice] = "Welcome to Vagabond, #{@user.name}!"
       redirect_to user_path(@user)
-    end
-  else
-
-    flash[:error]= @user.errors.full_messages
-    render :new
-  
-
-  end
-
-  def show
-    @user = User.find_by_id(params[:id])
-  end
-
-  def edit
-    user_id = params[:id]
-    @user = User.find_by_id(user_id)
-
-    if @user != current_user
-      redirect_to user_path(@user)
+    else
+      flash.now[:alert] = @user.errors.full_messages.to_sentence
+      render :new, status: :unprocessable_entity
     end
   end
+
+  def edit; end
 
   def update
-    user_id = params[:id]
-    user = User.find_by_id(user_id)
-    user.update_attributes(user_params)
-    redirect_to user_path(user)
+    if @user.update(user_params)
+      flash[:notice] = "Profile updated."
+      redirect_to user_path(@user)
+    else
+      flash.now[:alert] = @user.errors.full_messages.to_sentence
+      render :edit, status: :unprocessable_entity
+    end
   end
 
   def destroy
-    @user = User.find_by_id params[:id]
     @user.destroy
+    log_out if @user == current_user
+    flash[:notice] = "Account removed."
     redirect_to root_path
   end
 
   private
-  def user_params
-    params.require(:user).permit(:name, :current_city, :email, :password)
+
+  def set_user
+    @user = User.find(params[:id])
   end
 
+  def user_params
+    permitted = params.require(:user).permit(:name, :current_city, :email, :password, :avatar)
+    # Password is optional on update; drop it when blank so the digest is preserved.
+    permitted.delete(:password) if action_name == "update" && permitted[:password].blank?
+    permitted
+  end
 end

@@ -1,32 +1,48 @@
-<div class="post container">
-  <div class="row">
-    <div class="col-xs-8">
-    <div>
-      <small><%= link_to @user.name, user_path(@post.user_id) %>
-      <%= " from " + @user.current_city if User.find_by_id(@post.user_id).current_city %></small>
+<% content_for :title, "#{@post.title} — Vagabond" %>
+
+<article class="max-w-3xl mx-auto">
+  <nav class="text-sm text-slate-500 mb-4">
+    <%= link_to "Cities", cities_path, class: "hover:text-indigo-600" %>
+    <span class="mx-1">/</span>
+    <%= link_to @post.city.name, city_path(@post.city), class: "hover:text-indigo-600" %>
+  </nav>
+
+  <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight mb-4"><%= @post.title %></h1>
+
+  <div class="flex items-center justify-between flex-wrap gap-3 mb-6">
+    <div class="flex items-center gap-3">
+      <%= avatar_for @post.user %>
+      <div class="text-sm">
+        <p class="font-medium text-slate-800">
+          <%= link_to @post.user.name, user_path(@post.user), class: "hover:text-indigo-600" %>
+          <% if @post.user.current_city.present? %>
+            <span class="text-slate-400">from <%= @post.user.current_city %></span>
+          <% end %>
+        </p>
+        <p class="text-slate-500">
+          <%= @post.created_at.strftime("%B %-d, %Y") %>
+          <% if @post.edited? %><span class="text-slate-400">· edited</span><% end %>
+        </p>
+      </div>
     </div>
-      <h2 class="post-head"><%= @post.title %></h2>
-    </div>
-    <div class="col-xs-4">
-      <small>Created <%= @post.created_at.localtime.to_formatted_s(:long_ordinal) %></small>
-      <br>
-      <small><%= "Edited " + @post.updated_at.localtime.to_formatted_s(:long_ordinal) if @post.updated_at.to_s != @post.created_at.to_s %></small>
-    </div>
+
+    <% if current_user && (current_user == @post.user || current_user.admin?) %>
+      <div class="flex gap-2">
+        <% if current_user == @post.user %>
+          <%= link_to "Edit", edit_post_path(@post), class: "btn-secondary" %>
+        <% end %>
+        <%= button_to "Delete", post_path(@post), method: :delete, class: "btn-danger",
+              form: { data: { turbo_confirm: "Delete this story?" } } %>
+      </div>
+    <% end %>
   </div>
-  <p>
-    <%= link_to @city.name, city_path(@city.id) if @city %>
-  </p>
-  <div>
-  <p><%= @post.body %></p>
-  </div>
-  <br>
-  <div class="button-area">
-  <% if @user == current_user %>
-    <%= button_to "Edit Post", edit_post_path, method: "get" %>
+
+  <% if @post.photo.attached? %>
+    <%= image_tag @post.photo.variant(resize_to_limit: [1200, 800]),
+          class: "w-full rounded-2xl mb-6 object-cover", alt: @post.title %>
   <% end %>
-  <% if @user == current_user  ||admin %>
-    <%= button_to 'Delete Post', destroy_post_path(@post), method: :delete, data: {confirm: "Are you sure you want to delete #{ @post.title }?"} %>
-  <% end %>
-  <br>
-  </div>
-</div>
+
+  <div class="prose-body text-lg mb-12"><%= @post.body %></div>
+
+  <%= render "comments/section", post: @post, comments: @comments, comment: @comment %>
+</article>

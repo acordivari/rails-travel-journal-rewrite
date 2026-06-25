@@ -1,30 +1,47 @@
 class CitiesController < ApplicationController
+  before_action :require_login, only: %i[new create destroy]
+  before_action :require_admin, only: %i[new create destroy]
+  before_action :set_city, only: %i[show destroy]
+
   def index
-    @cities = City.all
+    @cities = City.left_joins(:posts)
+                  .select("cities.*, COUNT(posts.id) AS posts_count")
+                  .group("cities.id")
+                  .order(:name)
+  end
+
+  def show
+    @posts = @city.posts.includes(:user).recent
+    @post = @city.posts.build
   end
 
   def new
     @city = City.new
   end
 
-
-  def show
-    @city = City.find_by_id(params[:id])
-  end
-
   def create
-    @city = City.create(city_params)
-    redirect_to city_path(@city)
+    @city = City.new(city_params)
+    if @city.save
+      flash[:notice] = "#{@city.name} added."
+      redirect_to city_path(@city)
+    else
+      flash.now[:alert] = @city.errors.full_messages.to_sentence
+      render :new, status: :unprocessable_entity
+    end
   end
 
   def destroy
-    city_id = params[:id]
-    @city = City.find_by_id(city_id)
-    @city.delete
+    @city.destroy
+    flash[:notice] = "#{@city.name} removed."
     redirect_to cities_path
   end
 
   private
+
+  def set_city
+    @city = City.find(params[:id])
+  end
+
   def city_params
     params.require(:city).permit(:name, :image)
   end

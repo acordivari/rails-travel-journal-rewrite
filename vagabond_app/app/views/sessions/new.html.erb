@@ -1,17 +1,24 @@
-<div class="card pull-right" id="logincard">
-  <div class="card-block">
-<h3 class="card-title">Log In</h3>
+<% content_for :title, "Log in — Vagabond" %>
 
-<%= form_for @user, url: "/sessions", method: "post" do |f| %>
-  <div>
-    <%= f.text_field :email, placeholder: "Email" %>
+<div class="max-w-md mx-auto">
+  <h1 class="text-2xl font-bold mb-1">Welcome back</h1>
+  <p class="text-slate-500 mb-6">New here? <%= link_to "Create an account", new_user_path, class: "text-indigo-600 hover:underline" %>.</p>
+
+  <div class="card p-6">
+    <%= form_with url: session_path, method: :post, class: "space-y-5" do |f| %>
+      <div>
+        <%= f.label :email, class: "field-label" %>
+        <%= f.email_field :email, class: "field-input", autocomplete: "email", autofocus: true %>
+      </div>
+      <div>
+        <%= f.label :password, class: "field-label" %>
+        <%= f.password_field :password, class: "field-input", autocomplete: "current-password" %>
+      </div>
+      <%= f.submit "Log in", class: "btn-primary w-full" %>
+    <% end %>
   </div>
-  <br>
-  <div>
-    <%= f.password_field :password, placeholder: "Password" %>
-  </div>
-  <br>
-  <%= f.submit "Sign In" %>
-<% end %>
-</div>
+
+  <p class="text-xs text-slate-400 text-center mt-4">
+    Demo login: alex@example.com / password
+  </p>
 </div>

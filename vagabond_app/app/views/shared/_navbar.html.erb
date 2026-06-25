@@ -1,0 +1,21 @@
+<header class="sticky top-0 z-30 bg-white/90 backdrop-blur border-b border-slate-200">
+  <nav class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+    <%= link_to root_path, class: "flex items-center gap-2 text-xl font-bold tracking-tight text-indigo-700" do %>
+      <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Zm0 0a14.5 14.5 0 0 0 4-9 14.5 14.5 0 0 0-4-9 14.5 14.5 0 0 0-4 9 14.5 14.5 0 0 0 4 9Zm-9-9h18" />
+      </svg>
+      Vagabond
+    <% end %>
+
+    <div class="flex items-center gap-1 sm:gap-2">
+      <%= link_to "Browse cities", cities_path, class: "btn-ghost" %>
+      <% if logged_in? %>
+        <%= link_to "My profile", user_path(current_user), class: "btn-ghost" %>
+        <%= button_to "Log out", logout_path, method: :delete, class: "btn-secondary" %>
+      <% else %>
+        <%= link_to "Log in", login_path, class: "btn-ghost" %>
+        <%= link_to "Sign up", new_user_path, class: "btn-primary" %>
+      <% end %>
+    </div>
+  </nav>
+</header>

@@ -1,10 +1,9 @@
+<% content_for :title, "Edit — #{@post.title}" %>
 
-<%= form_for @post do |f| %>
-<div>
-  <%= f.text_field :title, placeholder: "Post Title" %>
+<div class="max-w-2xl mx-auto">
+  <h1 class="text-2xl font-bold mb-6">Edit story</h1>
+
+  <div class="card p-6">
+    <%= render "posts/form", post: @post %>
+  </div>
 </div>
-<div>
-  <%= f.text_area :body, placeholder: "Text", size: "100x10" %>
-</div>
-<%= f.submit "Save Changes" %>
-<% end %>

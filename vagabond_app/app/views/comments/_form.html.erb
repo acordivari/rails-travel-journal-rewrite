@@ -1,0 +1,9 @@
+<%= form_with model: [post, comment], class: "flex flex-col gap-2" do |f| %>
+  <% if comment.errors.any? %>
+    <p class="text-sm text-rose-700"><%= comment.errors.full_messages.to_sentence %></p>
+  <% end %>
+  <%= f.text_area :body, rows: 3, class: "field-input", placeholder: "Share your thoughts…" %>
+  <div class="self-end">
+    <%= f.submit "Post comment", class: "btn-primary" %>
+  </div>
+<% end %>

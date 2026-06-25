@@ -1,0 +1,27 @@
+<%= render "shared/form_errors", record: post %>
+
+<%= form_with model: post_form_target(post), class: "space-y-5" do |f| %>
+  <div>
+    <%= f.label :title, class: "field-label" %>
+    <%= f.text_field :title, class: "field-input", placeholder: "Give your story a title", autofocus: true %>
+  </div>
+
+  <div>
+    <%= f.label :body, "Your story", class: "field-label" %>
+    <%= f.text_area :body, rows: 10, class: "field-input", placeholder: "What should other travelers know?" %>
+  </div>
+
+  <div data-controller="preview">
+    <%= f.label :photo, "Photo (optional)", class: "field-label" %>
+    <%= f.file_field :photo, accept: "image/*", class: "field-input", data: { preview_target: "input", action: "preview#show" } %>
+    <% if post.photo.attached? %>
+      <%= image_tag post.photo.variant(resize_to_limit: [400, 300]), class: "mt-3 rounded-lg max-h-48 object-cover", alt: "Current photo" %>
+    <% end %>
+    <img data-preview-target="image" class="mt-3 hidden rounded-lg max-h-48 object-cover" alt="Preview">
+  </div>
+
+  <div class="flex gap-3 pt-2">
+    <%= f.submit(post.persisted? ? "Save changes" : "Publish story", class: "btn-primary") %>
+    <%= link_to "Cancel", (post.persisted? ? post_path(post) : city_path(post.city)), class: "btn-secondary" %>
+  </div>
+<% end %>

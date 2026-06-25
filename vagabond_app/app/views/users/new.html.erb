@@ -1,21 +1,10 @@
-<div class="m-x-auto newuser" style="width: 400px;">
-<%= form_for @user do |f| %>
-  <div>
-    <span class="label label-default"></span><%= f.text_field :name, placeholder: "Full Name" %>
+<% content_for :title, "Sign up — Vagabond" %>
+
+<div class="max-w-md mx-auto">
+  <h1 class="text-2xl font-bold mb-1">Create your account</h1>
+  <p class="text-slate-500 mb-6">Already have one? <%= link_to "Log in", login_path, class: "text-indigo-600 hover:underline" %>.</p>
+
+  <div class="card p-6">
+    <%= render "users/form", user: @user %>
   </div>
-  <br>
-  <div>
-    <span class="label label-default"></span><%= f.text_field :current_city, placeholder: "Current City" %>
-  </div>
-  <br>
-  <div>
-    <span class="label label-default"></span><%= f.text_field :email, placeholder: "Email" %>
-  </div>
-  <br>
-  <div>
-    <span class="label label-default"></span><%= f.password_field :password, placeholder: "Password" %>
-  </div>
-  <br>
-  <%= f.submit "Sign Up" %>
-<% end %>
 </div>

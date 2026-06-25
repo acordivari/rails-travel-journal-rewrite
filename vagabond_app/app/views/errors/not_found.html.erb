@@ -1,2 +1,10 @@
-<h1>404 Not Found</h1>
-<p>Uh Oh! The path specified does not exist!</p>
+<% content_for :title, "Not found — Vagabond" %>
+
+<div class="max-w-md mx-auto text-center py-16">
+  <p class="text-7xl font-extrabold text-indigo-200">404</p>
+  <h1 class="mt-4 text-2xl font-bold">We couldn't find that page</h1>
+  <p class="mt-2 text-slate-500">The page may have moved, or the link is broken.</p>
+  <div class="mt-6">
+    <%= link_to "Back to cities", root_path, class: "btn-primary" %>
+  </div>
+</div>

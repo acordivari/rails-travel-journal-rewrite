@@ -1,5 +1,22 @@
-<center>
-<div id="profile">
- <%= image_tag "rollinghills.jpeg", size: "1200x550", class: "profile" %>
+<% content_for :title, "Travelers — Vagabond" %>
+
+<h1 class="text-2xl font-bold mb-6">Travelers</h1>
+
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+  <% @users.each do |user| %>
+    <%= link_to user_path(user), class: "card p-5 flex items-center gap-4" do %>
+      <% if user.avatar.attached? %>
+        <%= image_tag user.avatar.variant(resize_to_fill: [56, 56]), class: "w-14 h-14 rounded-full object-cover", alt: user.name %>
+      <% else %>
+        <%= avatar_for user, size: "w-14 h-14 text-lg" %>
+      <% end %>
+      <div>
+        <p class="font-semibold text-slate-900"><%= user.name %></p>
+        <% if user.current_city.present? %>
+          <p class="text-sm text-slate-500">in <%= user.current_city %></p>
+        <% end %>
+        <p class="text-xs text-slate-400 mt-0.5"><%= pluralize(user.posts.size, "story") %></p>
+      </div>
+    <% end %>
+  <% end %>
 </div>
-<center>

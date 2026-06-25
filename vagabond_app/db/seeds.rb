@@ -1,41 +1,68 @@
-# This file should contain all the record creation needed to seed the database with its default values.
-# The data can then be loaded with the rails db:seed command (or created alongside the database with db:setup).
-#
-# Examples:
-#
-#   movies = Movie.create([{ name: 'Star Wars' }, { name: 'Lord of the Rings' }])
-#   Character.create(name: 'Luke', movie: movies.first)
+# Seed data for Vagabond. Idempotent-ish: clears existing records first so
+# `bin/rails db:seed` can be re-run during development.
 
+puts "Clearing existing data..."
+Comment.destroy_all
 Post.destroy_all
-User.destroy_all
 City.destroy_all
+User.destroy_all
 
-person1 = User.create({name: "Person 1", current_city: "San Francisco", email: "person1@gmail.com", password: "password"})
-person2 = User.create({name: "Person 2", current_city: "New York", email: "person2@gmail.com", password: "password"})
-person3 = User.create({name: "Person 3", current_city: "Los Angeles", email: "person3@gmail.com", password: "password"})
+SEED_IMAGE_DIR = Rails.root.join("db", "seed_images")
 
-city1 = City.create({name: "San Francisco", image: "http://www.sftravel.com/sites/sftraveldev.prod.acquia-sites.com/files/SanFrancisco_0.jpg"})
-city2 = City.create({name: "Gibraltar", image: "http://www.visitgibraltar.gi/images/homepage_slider/df1aw_slide2.jpeg"})
-city3 = City.create({name: "London", image: "http://cdn.ek.aero/english/images/London-1_tcm233-2111842.jpg"})
+def attach_image(record, attachment, filename)
+  path = SEED_IMAGE_DIR.join(filename)
+  return unless File.exist?(path)
 
+  record.public_send(attachment).attach(
+    io: File.open(path),
+    filename: filename,
+    content_type: Marcel::MimeType.for(path)
+  )
+end
 
-posta = Post.create({title: "Post A", body: "Post A content"})
-postb = Post.create({title: "Post B", body: "Post B content"})
-postc = Post.create({title: "Post C", body: "Post C content"})
-postd = Post.create({title: "Post D", body: "Post D content"})
-poste = Post.create({title: "Post E", body: "Post E content"})
-postf = Post.create({title: "Post F", body: "Post F content"})
+puts "Creating users..."
+alex = User.create!(name: "Alex Rivera", current_city: "San Francisco",
+                    email: "alex@example.com", password: "password", admin: true)
+mai  = User.create!(name: "Mai Tanaka", current_city: "London",
+                    email: "mai@example.com", password: "password")
+sam  = User.create!(name: "Sam Okafor", current_city: "Gibraltar",
+                    email: "sam@example.com", password: "password")
 
-person1.posts << posta
-person2.posts << postb
-person2.posts << postc
-person3.posts << postd
-person3.posts << poste
-person3.posts << postf
+puts "Creating cities..."
+cities = {
+  "San Francisco" => "sf.png",
+  "London"        => "london.jpg",
+  "Gibraltar"     => "gibraltar.jpg"
+}.map do |name, image|
+  city = City.create!(name: name)
+  attach_image(city, :image, image)
+  city
+end
+sf, london, gibraltar = cities
 
-city1.posts << posta
-city1.posts << postb
-city2.posts << postc
-city2.posts << postd
-city3.posts << poste
-city3.posts << postf
+puts "Creating posts..."
+posts = [
+  { city: sf,        user: alex, title: "Sunset over the Golden Gate",
+    body: "Caught the fog rolling in from Baker Beach this evening. The way the light hits the bridge towers never gets old — bring a windbreaker, it gets cold fast once the sun drops." },
+  { city: sf,        user: mai,  title: "Best dumplings in the Richmond",
+    body: "Spent the afternoon hopping between hole-in-the-wall spots on Clement Street. Cash only at most of them, but worth every dollar." },
+  { city: london,    user: mai,  title: "A rainy day in the British Museum",
+    body: "Free entry and you could spend a week here. The Reading Room alone is worth the trip. Go early to beat the school groups." },
+  { city: london,    user: sam,  title: "Walking the South Bank at night",
+    body: "From the Globe to the Eye, the river path is magic after dark. Street performers, food stalls, and the skyline lit up across the water." },
+  { city: gibraltar, user: sam,  title: "Meeting the macaques on the Rock",
+    body: "The Barbary macaques run the Upper Rock and they know it. Keep your snacks zipped away — they will help themselves. The views into two continents are unreal." },
+  { city: gibraltar, user: alex, title: "St. Michael's Cave is otherworldly",
+    body: "A natural cathedral of stalactites now used as a concert venue. The light show is a bit kitschy but the scale of the chambers is genuinely breathtaking." }
+]
+
+posts.each do |attrs|
+  attrs[:city].posts.create!(user: attrs[:user], title: attrs[:title], body: attrs[:body])
+end
+
+puts "Creating comments..."
+first_post = Post.recent.last
+first_post.comments.create!(user: mai, body: "Adding this to my list for next trip!")
+first_post.comments.create!(user: sam, body: "The fog really is something else out there.")
+
+puts "Done. #{User.count} users, #{City.count} cities, #{Post.count} posts, #{Comment.count} comments."

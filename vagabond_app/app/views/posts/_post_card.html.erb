@@ -1,0 +1,21 @@
+<article class="card p-5 flex flex-col gap-3" id="<%= dom_id(post) %>">
+  <div class="flex items-center gap-3 text-sm text-slate-500">
+    <%= avatar_for post.user, size: "w-8 h-8 text-xs" %>
+    <span>
+      <%= link_to post.user.name, user_path(post.user), class: "font-medium text-slate-700 hover:text-indigo-600" %>
+      &middot; <%= time_ago_in_words(post.created_at) %> ago
+    </span>
+  </div>
+
+  <h3 class="text-xl font-semibold leading-snug">
+    <%= link_to post.title, post_path(post), class: "hover:text-indigo-600" %>
+  </h3>
+
+  <p class="text-slate-600"><%= post.excerpt %></p>
+
+  <% if show_city ||= local_assigns[:show_city] %>
+    <div class="text-sm">
+      <%= link_to post.city.name, city_path(post.city), class: "text-indigo-600 hover:underline" %>
+    </div>
+  <% end %>
+</article>

@@ -1,31 +1,35 @@
-<div>
-</div>
+<% content_for :title, "#{@city.name} — Vagabond" %>
 
-<div class="holder">
-<h2> <%= @city.try(:name) %></h2>
-  <center><%= image_tag @city.image, height: 500, width: 800 %></center>
-    <% if current_user && admin %>
-    <%= button_to 'Delete City', destroy_city_path(@city), method: :delete, data: {confirm: "Are you sure you want to delete #{ @city.name }?"}, class: "btn btn-danger" %>
+<div class="relative rounded-3xl overflow-hidden mb-8 h-64 sm:h-80">
+  <%= attachment_image @city.image,
+        variant: { resize_to_fill: [1600, 640] },
+        css: "w-full h-full object-cover",
+        alt: @city.name %>
+  <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
+  <div class="absolute bottom-0 left-0 p-6 sm:p-8 flex items-end justify-between w-full">
+    <h1 class="text-3xl sm:text-4xl font-extrabold text-white drop-shadow"><%= @city.name %></h1>
+    <% if current_user&.admin? %>
+      <%= button_to "Delete city", city_path(@city), method: :delete, class: "btn-danger",
+            form: { data: { turbo_confirm: "Delete #{@city.name} and all its posts?" } } %>
     <% end %>
+  </div>
 </div>
-<br>
-<hr>
-<div class="holder">
-  <% if current_user %>
-    <%= button_to "New Post", new_city_post_path(@city, @post), method: "get", class: "btn btn-info" %>
 
+<div class="flex items-center justify-between mb-6">
+  <h2 class="text-2xl font-bold">Stories from <%= @city.name %></h2>
+  <% if logged_in? %>
+    <%= link_to "Write a story", new_city_post_path(@city), class: "btn-primary" %>
   <% else %>
-    <h3>
-     <%= link_to "Log In", login_path %>
-     or
-     <%= link_to "Sign Up", new_user_path %>
-     to add a post
-     </h3>
-  <% end %>
-  <hr>
-  <% @city.posts.sort_by{|post| [post['updated_at']]}.reverse.each do |post| %>
-  <h3> <%= link_to post.title, city_post_path(@city, post) %></h3>
-  <h5> Posted by: <%= User.find_by_id(post.user_id).name %> </h5>
-  <h4> <%= post.body[0,30] << "..." %> </h4>
+    <%= link_to "Log in to post", login_path, class: "btn-secondary" %>
   <% end %>
 </div>
+
+<% if @posts.any? %>
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <%= render partial: "posts/post_card", collection: @posts, as: :post %>
+  </div>
+<% else %>
+  <div class="card p-10 text-center text-slate-500">
+    No stories about <%= @city.name %> yet — be the first to share one.
+  </div>
+<% end %>

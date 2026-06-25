@@ -1,23 +1,47 @@
-<div>
+<% content_for :title, "#{@user.name} — Vagabond" %>
 
-  <%= @user.name %>
-  <br>
-  Currently in <%= @user.current_city %>
-  <br>
-  Joined <%= @user.created_at.localtime.to_formatted_s(:long_ordinal) %>
-  <% if @user == current_user %>
-    <%= button_to "Edit Profile", edit_user_path, method: "get" %>
-  <% end %>
-  <% if current_user && admin %>
-    <%= button_to 'Remove User', destroy_user_path(@user), method: :delete, data: {confirm: "Are you sure you want to delete #{ @user.name }?"}%>
-  <% end %>
-  <br>
-  <h2>Posts:</h2>
-  <% if @user.posts.length  < 1 %>
-    <%= @user == current_user ? "You have no posts yet! Add one by pressing the button below" : "This user has no posts" %>
-  <% end %>
-  <% @user.posts.each do |post| %>
-    <h3> <%= link_to post.title, user_post_path(@user, post) %> </h3>
+<header class="card p-6 mb-8 flex flex-col sm:flex-row sm:items-center gap-5">
+  <% if @user.avatar.attached? %>
+    <%= image_tag @user.avatar.variant(resize_to_fill: [96, 96]), class: "w-24 h-24 rounded-full object-cover", alt: @user.name %>
+  <% else %>
+    <%= avatar_for @user, size: "w-24 h-24 text-2xl" %>
   <% end %>
 
-</div>
+  <div class="flex-1">
+    <div class="flex items-center gap-2">
+      <h1 class="text-2xl font-bold"><%= @user.name %></h1>
+      <% if @user.admin? %>
+        <span class="text-xs font-semibold uppercase tracking-wide bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full">Admin</span>
+      <% end %>
+    </div>
+    <% if @user.current_city.present? %>
+      <p class="text-slate-500">Currently in <%= @user.current_city %></p>
+    <% end %>
+    <p class="text-sm text-slate-400 mt-1">Joined <%= @user.created_at.strftime("%B %Y") %></p>
+  </div>
+
+  <div class="flex gap-2">
+    <% if @user == current_user %>
+      <%= link_to "Edit profile", edit_user_path(@user), class: "btn-secondary" %>
+    <% end %>
+    <% if current_user&.admin? && @user != current_user %>
+      <%= button_to "Remove", user_path(@user), method: :delete, class: "btn-danger",
+            form: { data: { turbo_confirm: "Remove #{@user.name}?" } } %>
+    <% end %>
+  </div>
+</header>
+
+<h2 class="text-xl font-bold mb-4">Stories by <%= @user.name %></h2>
+
+<% if @posts.any? %>
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <%= render partial: "posts/post_card", collection: @posts, as: :post, locals: { show_city: true } %>
+  </div>
+<% else %>
+  <div class="card p-10 text-center text-slate-500">
+    <%= @user == current_user ? "You haven't written any stories yet." : "No stories yet." %>
+    <% if @user == current_user %>
+      <%= link_to "Browse cities", cities_path, class: "text-indigo-600 hover:underline" %> to start one.
+    <% end %>
+  </div>
+<% end %>

@@ -1,0 +1,11 @@
+<%= turbo_stream.append "comments" do %>
+  <%= render "comments/comment", comment: @comment %>
+<% end %>
+
+<%= turbo_stream.replace "new_comment" do %>
+  <div id="new_comment">
+    <%= render "comments/form", post: @post, comment: @post.comments.build %>
+  </div>
+<% end %>
+
+<%= turbo_stream.update "comments_count", @post.comments.size %>

@@ -1,0 +1,19 @@
+<section class="border-t border-slate-200 pt-8">
+  <h2 class="text-xl font-bold mb-4">
+    Comments <span class="text-slate-400 font-normal">(<span id="comments_count"><%= comments.size %></span>)</span>
+  </h2>
+
+  <% if logged_in? %>
+    <div id="new_comment" class="mb-6">
+      <%= render "comments/form", post: post, comment: comment %>
+    </div>
+  <% else %>
+    <p class="mb-6 text-sm text-slate-500">
+      <%= link_to "Log in", login_path, class: "text-indigo-600 hover:underline" %> to join the conversation.
+    </p>
+  <% end %>
+
+  <div id="comments" class="space-y-4">
+    <%= render partial: "comments/comment", collection: comments, as: :comment %>
+  </div>
+</section>

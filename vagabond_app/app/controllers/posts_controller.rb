@@ -1,85 +1,64 @@
 class PostsController < ApplicationController
+  before_action :require_login, only: %i[new create edit update destroy]
+  before_action :set_city, only: %i[index new create]
+  before_action :set_post, only: %i[show edit update destroy]
+  before_action -> { authorize_owner_or_admin(@post.user) }, only: %i[edit update destroy]
 
   def index
-    @posts = Post.all
-  end
-
-  def new
-    @post = Post.new
-    @city = City.find_by_id(params[:city_id])
-    if !current_user
-      redirect_to posts_path
-    elsif !@city
-      redirect_to user_path(current_user)
-    end
-  end
-
-  def create
-  current_city = City.find_by_id(params[:city_id])
-    if !current_user
-      redirect_to login_path
-    elsif !current_city
-      redirect_to user_path(current_user)
-    else
-      @post = Post.new(post_params)
-      if @post.save
-
-        current_user.posts << @post if current_user
-        current_city.posts << @post if current_city
-
-        redirect_to city_post_path(current_city,@post)
-      else
-        flash[:error]= @post.errors.full_messages
-        render :new
-      end
-    end
+    @posts = @city.posts.includes(:user).recent
   end
 
   def show
-  @post = Post.find_by_id(params[:id])
-  @user = User.find_by_id(@post.user_id)
-  @city = City.find_by_id(@post.city_id)
+    @comments = @post.comments.includes(:user).chronological
+    @comment = @post.comments.build
   end
 
-  def edit
-    post_id = params[:id]
-    @post = Post.find_by_id(post_id)
+  def new
+    @post = @city.posts.build
   end
+
+  def create
+    @post = @city.posts.build(post_params)
+    @post.user = current_user
+    if @post.save
+      flash[:notice] = "Post published."
+      redirect_to post_path(@post)
+    else
+      flash.now[:alert] = @post.errors.full_messages.to_sentence
+      render :new, status: :unprocessable_entity
+    end
+  end
+
+  def edit; end
 
   def update
-    post_id = params[:id]
-    current_city = City.find_by_id(params[:city_id]) || nil
-    @post = Post.find_by_id(post_id)
-    if @post.update_attributes(post_params)
-     if current_city
-       redirect_to city_post_path(current_city, @post)
-     else
-       redirect_to post_path(@post)
-     end
-
-   else
-     flash[:error]= @post.errors.full_messages
-     render :edit
-   end
+    if @post.update(post_params)
+      flash[:notice] = "Post updated."
+      redirect_to post_path(@post)
+    else
+      flash.now[:alert] = @post.errors.full_messages.to_sentence
+      render :edit, status: :unprocessable_entity
+    end
   end
 
   def destroy
-    post_id = params[:id]
-    @post = Post.find_by_id(post_id)
-    current_city = City.find_by_id(params[:city_id])
-    @post.delete
-    user_id = current_user.id
-    if params[:city_id]
-      redirect_to city_path(params[:city_id])
-    else
-      redirect_to user_path(user_id)
-    end
+    city = @post.city
+    @post.destroy
+    flash[:notice] = "Post deleted."
+    redirect_to city_path(city)
   end
 
   private
 
-  def post_params
-    params.require(:post).permit(:title, :body)
+  def set_city
+    @city = City.find(params[:city_id])
   end
 
+  def set_post
+    @post = Post.includes(:user, :city).find(params[:id])
+  end
+
+  def post_params
+    params.require(:post).permit(:title, :body, :photo)
+  end
 end

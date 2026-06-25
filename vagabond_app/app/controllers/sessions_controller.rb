@@ -1,26 +1,24 @@
 class SessionsController < ApplicationController
   def new
-    @user = User.new
-    render :new
+    redirect_to root_path if logged_in?
   end
 
   def create
-    user_params = params.require(:user).permit(:email, :password)
-    @user = User.confirm(user_params)
-    if @user
-      login(@user)
-      flash[:notice] = "Log In WOO!"
-      redirect_to @user
+    user = User.authenticate_by(email: params[:email].to_s.strip.downcase,
+                                password: params[:password])
+    if user
+      log_in(user)
+      flash[:notice] = "Welcome back, #{user.name}!"
+      redirect_to user_path(user)
     else
-      flash[:error] = "Uh Oh!  Spaghetti-Os"
-      redirect_to login_path
+      flash.now[:alert] = "Invalid email or password."
+      render :new, status: :unprocessable_entity
     end
   end
 
   def destroy
-    session[:user_id]=nil
-    flash[:notice]= "Your'e Outta Here!"
+    log_out
+    flash[:notice] = "You have been logged out."
     redirect_to root_path
   end
-
 end

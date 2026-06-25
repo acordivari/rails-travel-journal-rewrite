@@ -1,0 +1,14 @@
+<%= link_to city_path(city), class: "card group flex flex-col", id: dom_id(city) do %>
+  <div class="aspect-[16/10] w-full overflow-hidden">
+    <%= attachment_image city.image,
+          variant: { resize_to_fill: [640, 400] },
+          css: "w-full h-full object-cover group-hover:scale-105 transition duration-300",
+          alt: city.name %>
+  </div>
+  <div class="p-4 flex items-center justify-between">
+    <h3 class="text-lg font-semibold text-slate-900"><%= city.name %></h3>
+    <span class="text-sm text-slate-500">
+      <%= pluralize(city.try(:posts_count) || city.posts.size, "story") %>
+    </span>
+  </div>
+<% end %>

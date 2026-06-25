@@ -1,13 +1,10 @@
-<% if @city %>
-<h2> New Post For <%= @city.name %> </h2>
-<% end %>
+<% content_for :title, "New story — #{@city.name}" %>
 
-<%= form_for [@city, @post] do |f| %>
-  <div>
-    <%= f.text_field :title, placeholder: "Title" %>
-  </div><br>
-  <div>
-    <%= f.text_area :body, placeholder: "Post body", size: "100x10" %>
-  </div><br>
-  <%= f.submit "Add Post" %>
-<% end %>
+<div class="max-w-2xl mx-auto">
+  <p class="text-sm text-slate-500 mb-1">New story in</p>
+  <h1 class="text-2xl font-bold mb-6"><%= link_to @city.name, city_path(@city), class: "hover:text-indigo-600" %></h1>
+
+  <div class="card p-6">
+    <%= render "posts/form", post: @post %>
+  </div>
+</div>
