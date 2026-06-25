@@ -13,6 +13,79 @@ A travel-journaling web app: members write **posts** (travel stories) about **ci
 - **Active Storage** for city/post/avatar image uploads
 - **RSpec** + **FactoryBot** for tests; **RuboCop** (omakase) + **Brakeman** for quality/security
 
+## Architecture
+
+Vagabond is a server-rendered **MVC monolith** on Rails 8. HTML is generated on
+the server; Hotwire (Turbo + Stimulus) layers in SPA-like interactivity without a
+separate frontend app or build step.
+
+### Domain model
+
+Four ActiveRecord models with straightforward relationships:
+
+```
+User ──< Post >── City
+ │        │
+ │        └──< Comment
+ └──────────────┘
+```
+
+- A **City** has many posts and a cover image (Active Storage).
+- A **User** authors many posts and comments (`has_secure_password`), and has an optional avatar.
+- A **Post** belongs to a user and a city, has many comments, and an optional photo.
+- A **Comment** belongs to a user and a post.
+
+Referential integrity is enforced at the database level (`NOT NULL` foreign keys),
+and `dependent: :destroy` keeps deletes consistent.
+
+### Request flow
+
+```
+Browser → Routes → Controller (+ before_action filters) → Model → View / Turbo Stream
+                          │
+                          ├─ Authentication concern  (current_user, require_login, require_admin)
+                          ├─ Service object          (CityImageLookup)
+                          └─ Background job           (AttachCityImageJob)
+```
+
+- **Routing** (`config/routes.rb`) is RESTful with shallow nesting
+  (`cities → posts → comments`).
+- **Controllers** stay thin: load records, enforce authorization via the
+  `Authentication` concern, and render. Cross-cutting auth/authorization logic
+  lives in `app/controllers/concerns/authentication.rb` rather than being
+  duplicated per action.
+- **Models** hold validations, associations, scopes, and small domain methods
+  (e.g. `City#attach_stock_image!`, `Post#excerpt`).
+- **Service objects** (`app/services/`) encapsulate logic that doesn't belong in
+  a model or controller — currently `CityImageLookup`, the keyless stock-photo
+  finder.
+- **Background jobs** (`app/jobs/`, Active Job) move slow work off the request
+  cycle — `AttachCityImageJob` fetches a city photo after creation.
+
+### View & frontend layer
+
+- **Views** are ERB with heavy use of partials (`app/views/shared/` for the
+  navbar, flash, and form errors; `_post_card`, `_city_card`, `_comment`).
+- **Turbo** handles navigation and form submissions; comments are added/removed
+  via **Turbo Streams** (`app/views/comments/*.turbo_stream.erb`) without a full
+  page reload.
+- **Stimulus** controllers (`app/javascript/controllers/`) cover small bits of
+  client behavior (flash auto-dismiss, image upload preview), loaded over
+  **importmap** — no bundler/Node toolchain.
+- **Styling** is **Tailwind CSS v4** compiled by `tailwindcss-rails` and served
+  through the **Propshaft** pipeline; reusable component classes live in
+  `app/assets/tailwind/application.css`.
+
+### Storage & infrastructure
+
+- **PostgreSQL** is the primary datastore (with the `citext` extension for
+  case-insensitive email uniqueness).
+- **Active Storage** manages uploaded/looked-up images (local disk in
+  development; configurable per environment), with on-demand image variants via
+  ImageMagick.
+- Rails 8's **Solid** stack (Solid Queue/Cache/Cable) is available for
+  jobs/cache/websockets in production without extra infrastructure.
+
 ## Getting started
 
 Requires Ruby 3.3.0 and a running PostgreSQL server.
