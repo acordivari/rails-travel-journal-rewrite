@@ -45,6 +45,27 @@ The seed data creates three users. Demo login:
 Authorization is enforced in controllers via `before_action` filters
 (`app/controllers/concerns/authentication.rb`), not just hidden in views.
 
+## City stock images
+
+Cities can carry a cover photo via Active Storage. When an admin creates a city
+without uploading one, `AttachCityImageJob` looks up a stock photo by name using
+`CityImageLookup` (`app/services/city_image_lookup.rb`) — no API key required:
+
+1. **Wikipedia** REST page summary — the city's lead photo (flags, seals, maps and
+   SVG icons are rejected so e.g. Gibraltar gets a view, not its flag).
+2. **Openverse** — top openly-licensed photo for the city name.
+3. **Picsum** — a deterministic fallback so an image always resolves.
+
+Backfill any cities missing an image:
+
+```bash
+bin/rails cities:backfill_images        # only cities without an image
+bin/rails cities:backfill_images FORCE=1 # re-fetch all
+```
+
+> Active Storage variants use ImageMagick (`mini_magick`); install ImageMagick (or
+> switch `config.active_storage.variant_processor` to `:vips` and install libvips).
+
 ## Tests & checks
 
 ```bash

@@ -22,6 +22,8 @@ class CitiesController < ApplicationController
   def create
     @city = City.new(city_params)
     if @city.save
+      # No upload? Fetch a stock photo for the city by name in the background.
+      AttachCityImageJob.perform_later(@city) unless @city.image.attached?
       flash[:notice] = "#{@city.name} added."
       redirect_to city_path(@city)
     else

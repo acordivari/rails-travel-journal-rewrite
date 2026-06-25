@@ -31,6 +31,13 @@ RSpec.describe "Cities", type: :request do
         post cities_path, params: { city: { name: "Reykjavik" } }
       }.to change(City, :count).by(1)
     end
+
+    it "enqueues a stock-image fetch when no image is uploaded" do
+      sign_in(admin)
+      expect {
+        post cities_path, params: { city: { name: "Reykjavik" } }
+      }.to have_enqueued_job(AttachCityImageJob)
+    end
   end
 
   describe "deletion (admin only)" do

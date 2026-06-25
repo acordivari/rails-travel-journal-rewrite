@@ -38,5 +38,9 @@ module VagabondApp
 
     # Don't generate system test files.
     config.generators.system_tests = nil
+
+    # Use ImageMagick for Active Storage variants. The Rails 8 default is libvips,
+    # which isn't installed on this machine; mini_magick avoids broken image variants.
+    config.active_storage.variant_processor = :mini_magick
   end
 end

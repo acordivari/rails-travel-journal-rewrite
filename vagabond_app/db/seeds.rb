@@ -29,13 +29,20 @@ sam  = User.create!(name: "Sam Okafor", current_city: "Gibraltar",
                     email: "sam@example.com", password: "password")
 
 puts "Creating cities..."
+# Each city pulls a stock photo by name via CityImageLookup (Wikipedia → Picsum).
+# If the lookup fails (e.g. offline), we fall back to a bundled local image.
 cities = {
   "San Francisco" => "sf.png",
   "London"        => "london.jpg",
   "Gibraltar"     => "gibraltar.jpg"
-}.map do |name, image|
+}.map do |name, fallback_image|
   city = City.create!(name: name)
-  attach_image(city, :image, image)
+  if city.attach_stock_image!
+    puts "  #{name}: pulled stock image"
+  else
+    attach_image(city, :image, fallback_image)
+    puts "  #{name}: used local fallback image"
+  end
   city
 end
 sf, london, gibraltar = cities
