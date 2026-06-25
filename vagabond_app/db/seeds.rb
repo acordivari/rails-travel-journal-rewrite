@@ -20,6 +20,16 @@ def attach_image(record, attachment, filename)
   )
 end
 
+# Confirms the attached city image can actually be turned into a variant, so we
+# never seed an image that would render broken in the browser.
+def renderable?(city)
+  city.image.variant(resize_to_fill: [ 640, 400 ]).processed
+  true
+rescue => e
+  puts "  (#{city.name}: stock image not renderable: #{e.message})"
+  false
+end
+
 puts "Creating users..."
 alex = User.create!(name: "Alex Rivera", current_city: "San Francisco",
                     email: "alex@example.com", password: "password", admin: true)
@@ -37,9 +47,10 @@ cities = {
   "Gibraltar"     => "gibraltar.jpg"
 }.map do |name, fallback_image|
   city = City.create!(name: name)
-  if city.attach_stock_image!
+  if city.attach_stock_image! && renderable?(city)
     puts "  #{name}: pulled stock image"
   else
+    city.image.purge if city.image.attached?
     attach_image(city, :image, fallback_image)
     puts "  #{name}: used local fallback image"
   end

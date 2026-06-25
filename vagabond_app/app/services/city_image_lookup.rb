@@ -77,7 +77,11 @@ class CityImageLookup
 
     io           = StringIO.new(data)
     content_type = Marcel::MimeType.for(io, name: File.basename(uri.path))
-    ext          = content_type.split("/").last.sub("jpeg", "jpg")
+    # Guard against error pages / non-raster payloads being attached as "images".
+    raise "not a raster image: #{content_type}" unless content_type.start_with?("image/")
+    raise "vector image" if content_type.include?("svg")
+
+    ext = content_type.split("/").last.sub("jpeg", "jpg")
 
     Result.new(
       io: io,
